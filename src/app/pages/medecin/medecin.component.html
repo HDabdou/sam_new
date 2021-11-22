@@ -1,0 +1,96 @@
+
+<div class="row">
+
+    <div class="update ml-auto mr-auto">
+        <button *ngIf="etap == 1" (click)="etap = 2;this.errorTel = ''" type="submit" class="btn btn-danger btn-round">Ajouter Médecin</button>
+        <button *ngIf="etap == 2" (click)="etap = 1;this.errorTel = ''" type="submit" class="btn btn-danger btn-round">Liste Médecin</button>
+    </div>
+
+<div class="col-md-12" *ngIf="etap == 1">
+  <div class="card">
+    <div class="card-header">
+      <h4 class="card-title"> Liste des Médecins</h4>
+      
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead class=" text-primary">
+            <th>Nom</th>
+            <th>prenom</th>
+            <th>Adresse</th>
+            <th>Téléphone</th>
+          </thead>
+          <tbody>
+            <tr *ngFor="let i of patients | paginate: { itemsPerPage: 5, currentPage: p }">
+              <td>{{i.prenom}}</td>
+              <td>{{i.nom}}</td>
+              <td>{{i.adresse}}</td>
+              <td>{{i.telephone}} </td>
+             
+            </tr>
+
+          </tbody>
+        </table>
+        <pagination-controls *ngIf="nbrPatients !=0"  (pageChange)="p = $event"></pagination-controls>
+
+      </div>
+    </div>
+  </div>
+</div>
+<div class="col-md-12" *ngIf="etap == 2">
+    <div class="card card-user">
+      <div class="card-header">
+        <h5 class="card-title">Ajout Médecin</h5>
+        <div class="alert alert-success" *ngIf="errorMessage == 1"><p>Patient enregistré et invitation envoyée</p> <span style="float: right;margin-top: -2.5rem;font-size: 2rem;" (click)="errorMessage = 0">X</span> </div>
+            <div class="alert alert-warning" *ngIf="errorMessage == 2"><p>Patient existe mais invitation envoyée</p><span style="float: right;margin-top: -2.5rem;font-size: 2rem;" (click)="errorMessage = 0">X</span></div>
+            <div class="alert alert-danger" *ngIf="errorMessage == -1"><p>Enregistrement echoué</p><span style="float: right;margin-top: -2.5rem;font-size: 2rem;" (click)="errorMessage = 0">X</span></div>
+
+      </div>
+      <div class="card-body">
+        <form>
+          <div class="row">
+            <div class="col-md-6 pr-1">
+              <div class="form-group">
+                <label>Numéro téléphone</label>
+                <input type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="tel" placeholder="téléphone Ex : 77 000 00 00" >
+              <div class="alert alert-danger" *ngIf="errorTel != ''"><p>{{errorTel}}</p></div>
+              </div>
+            </div>
+            <div class="col-md-6 pl-1">
+              <div class="form-group">
+                <label>Adresse</label>
+                <input type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="adresse" placeholder="Adresse" >
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 pr-1">
+              <div class="form-group">
+                <label>Prénom</label>
+                <input type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="prenom" placeholder="prénom" >
+              </div>
+            </div>
+            <div class="col-md-6 pl-1">
+              <div class="form-group">
+                <label>Nom</label>
+                <input type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="nom" placeholder="nom"  >
+              </div>
+            </div>
+          </div>
+          <div class="row" *ngIf="loading" style="text-align: center;margin-left: 3rem;">
+              <div class="spinner-border text-primary" role="status">
+                  <span class="sr-only">Loading...</span>
+              </div>
+          </div>
+        <div class="row">
+          <div class="update ml-auto mr-auto">
+            <button type="submit" [disabled]="!tel || tel == '' || !adresse || adresse =='' || !prenom || prenom == '' || !nom || nom == ''" (click)="savePatient()" class="btn btn-success btn-round">Valider</button>
+          </div>
+        </div>
+      </form>
+      </div>
+    </div>
+  </div>
+
+</div>

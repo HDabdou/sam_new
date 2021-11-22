@@ -1,0 +1,176 @@
+
+<div class="row">
+
+        <div class="update ml-auto mr-auto">
+            <button *ngIf="etap == 1" (click)="etap = 2;this.errorTel = ''" type="submit" class="btn btn-info btn-round">Ajouter Patient</button>
+            <button *ngIf="etap == 2" (click)="etap = 1;this.errorTel = ''" type="submit" class="btn btn-info btn-round">Liste Patients</button>
+            <button *ngIf="etap == 3"  (click)="etap =1;this.errorTel = ''" type="submit" class="btn btn-info btn-round">Retour</button>
+        </div>
+    
+    <div class="col-md-12" *ngIf="etap == 1">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="card-title"> Liste des Patients</h4>
+          
+        </div>
+        <div class="card-body">
+          <div class="table-responsive" style="overflow: auto !important;">
+            <table class="table">
+              <thead class=" text-primary">
+                <th>Nom</th>
+                <th>prenom</th>
+                <th>Adresse</th>
+                <th>Téléphone</th>
+                <th>Options</th>
+              </thead>
+              <tbody>
+                <tr *ngFor="let i of patients | paginate: { itemsPerPage: 5, currentPage: p }">
+                  <td>{{i.prenom}}</td>
+                  <td>{{i.nom}}</td>
+                  <td>{{i.adresse}}</td>
+                  <td>{{i.telephone}} </td>
+                  <td>
+                    <button type="button" (click)="etap = 3;idP = i.id; getChats(i.id)" class="btn btn-primary btn-round" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="nc-icon nc-chat-33"></i></button>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+            <pagination-controls *ngIf="nbrPatients !=0"  (pageChange)="p = $event"></pagination-controls>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12" *ngIf="etap == 2">
+        <div class="card card-user">
+          <div class="card-header">
+            <h5 class="card-title">Ajout Patient</h5>
+            <div class="alert alert-success" *ngIf="errorMessage == 1"><p>Patient enregistré et invitation envoyée</p> <span style="float: right;margin-top: -2.5rem;font-size: 2rem;" (click)="errorMessage = 0">X</span> </div>
+            <div class="alert alert-warning" *ngIf="errorMessage == 2"><p>Patient existe mais invitation envoyée</p><span style="float: right;margin-top: -2.5rem;font-size: 2rem;" (click)="errorMessage = 0">X</span></div>
+            <div class="alert alert-danger" *ngIf="errorMessage == -1"><p>Enregistrement echoué</p><span style="float: right;margin-top: -2.5rem;font-size: 2rem;" (click)="errorMessage = 0">X</span></div>
+          </div>
+          <div class="card-body">
+            <form>
+                <div class="row">
+                  <div class="col-md-6 pr-1">
+                    <div class="form-group">
+                      <label>Numéro téléphone</label>
+                      <input type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="tel" placeholder="téléphone Ex : 77 000 00 00" >
+                    <div class="alert alert-danger" *ngIf="errorTel != ''"><p>{{errorTel}}</p></div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 pl-1">
+                    <div class="form-group">
+                      <label>Adresse</label>
+                      <input type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="adresse" placeholder="Adresse" >
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 pr-1">
+                    <div class="form-group">
+                      <label>Prénom</label>
+                      <input type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="prenom" placeholder="prénom" >
+                    </div>
+                  </div>
+                  <div class="col-md-6 pl-1">
+                    <div class="form-group">
+                      <label>Nom</label>
+                      <input type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="nom" placeholder="nom"  >
+                    </div>
+                  </div>
+                </div>
+                <div class="row" *ngIf="loading" style="text-align: center;margin-left: 3rem;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+              <div class="row">
+                <div class="update ml-auto mr-auto">
+                  <button type="submit" [disabled]="!tel || tel == '' || !adresse || adresse =='' || !prenom || prenom == '' || !nom || nom == ''" (click)="savePatient()" class="btn btn-success btn-round">Valider</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+   
+      <div class="col-md-12" *ngIf="etap == 3">
+        <div class="card card-user">
+          <div class="card-header">
+            <h5 class="card-title">Discussions</h5>
+          </div>
+          <div class="card-body" style="box-shadow: 0 4px 17px rgba(0, 0, 0, 0.35);">
+            <div class="mycontainer" style="margin-bottom: 5rem;">
+              <div class="col-sm-12" *ngFor="let i of this.discussions1">
+                <div *ngIf="this.idM != i.sender" class="patient">
+                  <div style="width: 100%;">
+                     <img *ngIf="i.type_document == 'image'" style="width: 98%;" [src]="i.document" alt="your image" />
+         
+                     <label *ngIf="i.type_document != 'image'" style="color: black;">
+                     {{i.document}}
+                     </label>
+                  </div>
+                 
+                   <p style="font-size: 13px;
+                   float: right;
+                   color: grey;
+                   margin: 0 !important;padding-top: 1rem;">
+                     {{displayDate(i.created_at)}}
+                   </p>
+                 </div>
+                 
+                 <div *ngIf="this.idM == i.sender" class="medecin">
+                   <div style="width: 100%;">
+                   <img *ngIf="i.type_document == 'image'" style="width: 98%;" [src]="i.document" alt="your image" />
+         
+                   <label *ngIf="i.type_document != 'image'" style="color: black;">
+                     {{i.document}}
+                    </label>
+                   </div>
+                    <p style="font-size: 13px;
+                    float: right;
+                    color: grey;
+                    margin: 0 !important;padding-top: 1rem;">
+                      {{displayDate(i.created_at)}}
+                    </p>
+         
+               </div>
+             </div>
+              
+         </div>
+         <form action="" >
+            <div class="row" >
+                <div class="col-10 pr-1">
+                  <div class="form-group">
+                    <textarea type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="message" placeholder="Tapez message" name="message" id="" cols="30" rows="10"></textarea>
+
+                    <!--<input type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="tel" placeholder="téléphone Ex : 77 000 00 00" >-->
+                  </div>
+                </div>
+                <div class="col-2 pl-1">
+                  <div class="form-group">
+                    <i class="nc-icon nc-send btn-round1" (click)="sendResponse()" style="font-size: 60px;"></i>
+                    <!--<input type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="adresse" placeholder="Adresse" >--> 
+                  </div>
+                </div>
+              </div>
+         </form>
+           <!--<div class="row" style="width: 98%; bottom: 0;position: absolute;background: white;width: 100%;margin: 0;padding: 0;box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);">
+               <div class="col-12">
+                   <div style="width: 90%;">
+                       <textarea type="text" class="form-control" [ngModelOptions]="{standalone: true}" [(ngModel)]="message" placeholder="Tapez message" name="message" id="" cols="30" rows="10"></textarea>
+                    </div>
+                   <div style="width: 10%;">
+                    <button class="btn btn-default"><i class="nc-icon nc-send"></i></button>
+
+                   </div>
+
+               </div>
+
+           </div>-->
+          </div>
+        </div>
+      </div>
+  </div>
+ 
